@@ -32,7 +32,21 @@ int rgb2gray( Mat& bgr, Mat& gray )
 
 	/* ***** Working area - begin ***** */
 
-	
+	for(int i = 0; i < bgr.rows; i++){
+		for(int j = 0; j < bgr.cols; j++){
+			// Load 3 bytes into a vector
+			cv::Vec3b pixel = bgr.at<cv::Vec3b>(i,j);
+			// BGR
+			unsigned char blue = pixel[0];
+			unsigned char green = pixel[1];
+			unsigned char red = pixel[2];
+			
+			// Round the floating point value, and cast it to unsigned char
+			unsigned char gray_scale = static_cast<unsigned char>(std::round( 0.299*red+0.587*green+0.114*blue));
+			// Save it to grayscale matrix
+			gray.at<unsigned char>(i,j) = gray_scale;
+		}
+	}
 	/* ***** Working area - end ***** */
 
 	return 0;
