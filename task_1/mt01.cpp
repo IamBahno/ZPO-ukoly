@@ -79,7 +79,41 @@ int convolution( cv::Mat& gray, const cv::Mat& kernel, cv::Mat& dst )
 			3. save to the output image
 		*/
 
-	
+
+	// clone kernel and flip him vertically and horizontally
+	cv::Mat kernel_copy = kernel.clone();
+
+	std::swap(kernel_copy.at<float>(0, 0), kernel_copy.at<float>(2, 2));
+    std::swap(kernel_copy.at<float>(0, 2), kernel_copy.at<float>(2, 0));
+    std::swap(kernel_copy.at<float>(0, 1), kernel_copy.at<float>(2, 1));
+    std::swap(kernel_copy.at<float>(1, 0), kernel_copy.at<float>(1, 2));
+
+	// sum the absolute kernel values for later nomralization
+	float kernel_sum = 0; 
+	for (int i = 0; i < kernel_copy.rows; i++){
+		for(int j = 0; j < kernel_copy.cols; j++){
+			kernel_sum += abs( kernel_copy.at<float>(i,j));
+		}
+	}
+
+	// iterate over image, but not the edges of the image
+	for(int i = 1; i < gray.rows - 1; i++){
+		for(int j = 1; j < gray.cols - 1; j++){
+			float new_value = 0;
+			//iterate over kernel
+			for(int k = -1; k <= 1; k++){
+				for(int l = -1; l <= 1; l++){
+					new_value += gray.at<unsigned char>(i+k,j+l) * kernel_copy.at<float>(1+k,l+1);
+				}
+			}
+
+			// normalize and store the result in the destination matrix
+			if (kernel_sum != 0) { // avoid division by zero (if the kernel is empty)
+				new_value /= kernel_sum;
+			}
+			dst.at<float>(i,j) = new_value;
+		}
+	}
 
 	/* ***** Working area - end ***** */
 
