@@ -67,13 +67,36 @@ int passFilter( const cv::Mat& src, cv::Mat& dst, int limit_frequency, int flag,
 
 	/* ***** Working area - begin ***** */
 
+	int width = spectrumCplx.cols;
+	int height = spectrumCplx.rows;
+
+	// center region coordinates
+	int left = width / 2 - limit_frequency / 2;
+	int right = width / 2 + limit_frequency / 2;
+	int top = height / 2 - limit_frequency / 2;
+	int bottom = height / 2 + limit_frequency / 2;
+
 	if( flag == HIGH_PASS_FILTER ) {
 		// ponechejte pouze hodnoty spektra nad limitní frekvencí
 
+		// zero out the center region
+		for (int y = top; y < bottom; y++) {
+			for (int x = left; x < right; x++) {
+				spectrumCplx.at<cv::Vec2f>(y, x) = cv::Vec2f(0, 0);
+			}
+		}
 	}
 	else if( flag == LOW_PASS_FILTER ) {
 		// ponechejte pouze hodnoty spektra pod limitní frekvencí
 
+		// zero out everything outside the center region
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				if (x < left || x >= right || y < top || y >= bottom) {
+					spectrumCplx.at<cv::Vec2f>(y, x) = cv::Vec2f(0, 0);
+				}
+			}
+		}
 	}
 
 	/* ***** Working area - end ***** */
@@ -94,7 +117,6 @@ int passFilter( const cv::Mat& src, cv::Mat& dst, int limit_frequency, int flag,
 
 	return 0;
 }
-
 
 
 
